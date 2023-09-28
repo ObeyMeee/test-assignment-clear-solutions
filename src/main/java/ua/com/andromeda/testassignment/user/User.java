@@ -6,14 +6,16 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PastOrPresent;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
-import java.time.ZonedDateTime;
+import java.util.Calendar;
 import java.util.UUID;
 
 @Entity
 @Table(name = "users")
 @Getter
 @Setter
+@ToString
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -33,9 +35,8 @@ public class User {
     private String lastName;
 
     @Column(nullable = false)
-    @NotBlank(message = "Birth date cannot be empty")
     @PastOrPresent
-    private ZonedDateTime birthDate;
+    private Calendar birthDate;
 
     private String address;
     private String phoneNumber;
