@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.Calendar;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -36,7 +36,7 @@ public class User {
 
     @Column(nullable = false)
     @PastOrPresent
-    private Calendar birthDate;
+    private LocalDate birthDate;
 
     private String address;
     private String phoneNumber;

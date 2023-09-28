@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.com.andromeda.testassignment.dto.Dto;
 
-import java.util.Calendar;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -27,8 +27,8 @@ public class UserController {
 
     @GetMapping("birthDate/between")
     public ResponseEntity<Dto<List<User>>> findAllByBirthDateBetween(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Calendar from,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Calendar to) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
         List<User> foundedUsers = userService.findAllByBirthDateBetween(from, to);
         Dto<List<User>> body = new Dto<>(foundedUsers);
         return ResponseEntity.ok(body);

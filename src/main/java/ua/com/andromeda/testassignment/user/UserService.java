@@ -9,8 +9,8 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import ua.com.andromeda.testassignment.user.exception.IllegalAgeException;
 
-import java.time.Year;
-import java.util.Calendar;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -39,15 +39,16 @@ public class UserService {
     }
 
     private void validateAge(@Valid User userToSave) {
-        int currentYear = Year.now().getValue();
-        int birthYear = userToSave.getBirthDate().get(Calendar.YEAR);
-        if (currentYear - birthYear < Integer.parseInt(minAge)) {
+        LocalDate userBirthDate = userToSave.getBirthDate();
+        LocalDate now = LocalDate.now();
+        long userFullYears = ChronoUnit.YEARS.between(userBirthDate, now);
+        if (userFullYears < Integer.parseInt(minAge)) {
             throw new IllegalAgeException("You must be at least " + minAge + " years old");
         }
     }
 
-    public List<User> findAllByBirthDateBetween(Calendar from, Calendar to) {
-        if (from.after(to)) {
+    public List<User> findAllByBirthDateBetween(LocalDate from, LocalDate to) {
+        if (from.isAfter(to)) {
             throw new IllegalArgumentException("Invalid range. 'From' date must be less than 'to'");
         }
         return userRepository.findAllByBirthDateBetweenAnd(from, to);
