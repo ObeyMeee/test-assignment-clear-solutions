@@ -1,6 +1,10 @@
 package ua.com.andromeda.testassignment.user;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -9,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import ua.com.andromeda.testassignment.dto.Dto;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -25,17 +28,20 @@ public class UserController {
         return ResponseEntity.ok(body);
     }
 
-    @GetMapping("birthDate/between")
-    public ResponseEntity<Dto<List<User>>> findAllByBirthDateBetween(
+    @GetMapping("/search/birthDate/between")
+    public ResponseEntity<Dto<Page<User>>> findAllByBirthDateBetween(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-        List<User> foundedUsers = userService.findAllByBirthDateBetween(from, to);
-        Dto<List<User>> body = new Dto<>(foundedUsers);
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "0") int page) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User> foundedUsers = userService.findAllByBirthDateBetween(from, to, pageable);
+        Dto<Page<User>> body = new Dto<>(foundedUsers);
         return ResponseEntity.ok(body);
     }
 
     @PostMapping
-    public ResponseEntity<Dto<User>> save(@RequestBody User user) {
+    public ResponseEntity<Dto<User>> save(@RequestBody @Valid User user) {
         Dto<User> body = saveUser(user);
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.LOCATION, "/users/" + body.data().getId());
@@ -48,7 +54,7 @@ public class UserController {
     }
 
     @PutMapping
-    public ResponseEntity<Dto<User>> update(@RequestBody User user) {
+    public ResponseEntity<Dto<User>> update(@RequestBody @Valid User user) {
         Dto<User> body = saveUser(user);
         return ResponseEntity.ok(body);
     }
@@ -62,7 +68,7 @@ public class UserController {
     }
 
     @DeleteMapping("{userId}")
-    public ResponseEntity<Void> delete(@PathVariable String userId) {
+    public ResponseEntity<Map<String, String>> delete(@PathVariable String userId) {
         userService.delete(userId);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }

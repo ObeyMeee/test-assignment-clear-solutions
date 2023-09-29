@@ -1,4 +1,4 @@
-package ua.com.andromeda.testassignment.user.exception;
+package ua.com.andromeda.testassignment.exception;
 
 public class IllegalAgeException extends RuntimeException{
     public IllegalAgeException(String message) {
