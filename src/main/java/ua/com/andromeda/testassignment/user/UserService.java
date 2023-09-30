@@ -1,22 +1,17 @@
 package ua.com.andromeda.testassignment.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
-import ua.com.andromeda.testassignment.exception.IllegalAgeException;
 import ua.com.andromeda.testassignment.exception.InvalidRangeException;
 import ua.com.andromeda.testassignment.exception.InvalidUUIDException;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.UUID;
 
@@ -26,8 +21,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
 
-    @Value("${user.min.age}")
-    private String minAge;
 
     public User findById(String id) {
         try {
@@ -40,17 +33,7 @@ public class UserService {
     }
 
     public User save(@Valid User userToSave) {
-        validateAge(userToSave);
         return userRepository.save(userToSave);
-    }
-
-    private void validateAge(@NotNull User user) {
-        LocalDate userBirthDate = user.getBirthDate();
-        LocalDate now = LocalDate.now();
-        long userFullYears = ChronoUnit.YEARS.between(userBirthDate, now);
-        if (userFullYears < Integer.parseInt(minAge)) {
-            throw new IllegalAgeException("You must be at least " + minAge + " years old");
-        }
     }
 
     public void delete(String id) {

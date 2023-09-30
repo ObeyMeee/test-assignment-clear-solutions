@@ -7,6 +7,8 @@ import jakarta.validation.constraints.PastOrPresent;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import ua.com.andromeda.testassignment.validation.annotation.BirthDate;
+import ua.com.andromeda.testassignment.validation.annotation.PhoneNumber;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -36,8 +38,11 @@ public class User {
 
     @Column(nullable = false)
     @PastOrPresent
+    @BirthDate
     private LocalDate birthDate;
 
     private String address;
+
+    @PhoneNumber
     private String phoneNumber;
 }
