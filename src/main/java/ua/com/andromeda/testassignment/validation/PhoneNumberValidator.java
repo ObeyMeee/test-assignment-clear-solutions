@@ -8,6 +8,6 @@ import ua.com.andromeda.testassignment.validation.annotation.PhoneNumber;
 public class PhoneNumberValidator implements ConstraintValidator<PhoneNumber, String> {
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        return PhoneNumberUtil.getInstance().isPossibleNumber(value, "UA");
+        return value == null || PhoneNumberUtil.getInstance().isPossibleNumber(value, "UA");
     }
 }

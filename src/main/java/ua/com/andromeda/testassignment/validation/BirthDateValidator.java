@@ -2,7 +2,7 @@ package ua.com.andromeda.testassignment.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import ua.com.andromeda.testassignment.PropertiesLoader;
+import ua.com.andromeda.testassignment.config.PropertiesLoader;
 import ua.com.andromeda.testassignment.validation.annotation.BirthDate;
 
 import java.time.LocalDate;

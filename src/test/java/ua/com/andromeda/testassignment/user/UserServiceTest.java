@@ -9,11 +9,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ua.com.andromeda.testassignment.exception.IllegalAgeException;
 import ua.com.andromeda.testassignment.exception.InvalidRangeException;
 import ua.com.andromeda.testassignment.exception.InvalidUUIDException;
+import ua.com.andromeda.testassignment.exception.UserNotFoundException;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -68,7 +67,7 @@ class UserServiceTest {
         when(userRepository.findById(randomId)).thenReturn(Optional.empty());
 
         // method invocation, assertions
-        assertThrows(ResourceNotFoundException.class, () -> target.findById(randomId.toString()));
+        assertThrows(UserNotFoundException.class, () -> target.findById(randomId.toString()));
         verify(userRepository).findById(randomId);
         verify(userRepository, times(1)).findById(randomId);
     }
@@ -80,24 +79,6 @@ class UserServiceTest {
         verify(userRepository, never()).findById(any());
     }
 
-    @Test
-    void save_shouldThrowIllegalAgeException_futureDate() {
-        User userToSave = getDefaultUser();
-        LocalDate futureDate = LocalDate.now().plusDays(1);
-        userToSave.setBirthDate(futureDate);
-        assertThrows(IllegalAgeException.class, () -> target.save(userToSave));
-        verify(userRepository, never()).save(userToSave);
-    }
-
-    @Test
-    void save_shouldThrowIllegalAgeException_underAge() {
-        User userToSave = getDefaultUser();
-        int restrictedAge = Integer.parseInt(minAge) - 1;
-        LocalDate futureDate = LocalDate.now().minusYears(restrictedAge);
-        userToSave.setBirthDate(futureDate);
-        assertThrows(IllegalAgeException.class, () -> target.save(userToSave));
-        verify(userRepository, never()).save(userToSave);
-    }
 
     @Test
     void save_success_exactAllowedAge() {
@@ -170,12 +151,14 @@ class UserServiceTest {
         UUID id = UUID.randomUUID();
         expected.setId(id);
         when(userRepository.findById(id)).thenReturn(Optional.of(expected));
+        when(userRepository.save(any(User.class))).thenReturn(expected);
 
         // method invocation
         User actual = target.partialUpdate(id.toString(), Collections.emptyMap());
 
         // assertions
         verify(userRepository, times(1)).findById(id);
+        verify(userRepository, times(1)).save(any(User.class));
         assertEquals(expected, actual);
     }
 
@@ -186,6 +169,8 @@ class UserServiceTest {
         UUID id = UUID.randomUUID();
         userToUpdate.setId(id);
         when(userRepository.findById(id)).thenReturn(Optional.of(userToUpdate));
+        when(userRepository.save(any(User.class))).thenReturn(userToUpdate);
+
         String newFirstName = "Taras";
         String newLastName = "Shevchenko";
         Map<String, Object> fields = Map.of(
@@ -198,6 +183,7 @@ class UserServiceTest {
 
         // assertions
         verify(userRepository, times(1)).findById(id);
+        verify(userRepository, times(1)).save(any(User.class));
         assertEquals(newFirstName, actual.getFirstName());
         assertEquals(newLastName, actual.getLastName());
         assertEquals(userToUpdate.getEmail(), actual.getEmail());
@@ -213,6 +199,7 @@ class UserServiceTest {
         UUID id = UUID.randomUUID();
         userToUpdate.setId(id);
         when(userRepository.findById(id)).thenReturn(Optional.of(userToUpdate));
+        when(userRepository.save(userToUpdate)).thenReturn(userToUpdate);
         Map<String, Object> fields = Map.of("nonExisting", "nonExistingValue");
 
         // method invocation
@@ -220,6 +207,7 @@ class UserServiceTest {
 
         // assertions
         verify(userRepository, times(1)).findById(id);
+        verify(userRepository, times(1)).save(userToUpdate);
         assertEquals(userToUpdate, actual);
     }
 }

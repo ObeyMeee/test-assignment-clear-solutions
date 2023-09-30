@@ -1,6 +1,7 @@
 package ua.com.andromeda.testassignment.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -12,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,9 +20,9 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import ua.com.andromeda.testassignment.dto.Dto;
-import ua.com.andromeda.testassignment.exception.IllegalAgeException;
 import ua.com.andromeda.testassignment.exception.InvalidRangeException;
 import ua.com.andromeda.testassignment.exception.InvalidUUIDException;
+import ua.com.andromeda.testassignment.exception.UserNotFoundException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -56,6 +56,7 @@ class UserControllerTest {
         user.setLastName("Heraskin");
         user.setEmail("andromeda@gmail.com");
         user.setAddress("Peremohy Street 20");
+        user.setBirthDate(LocalDate.of(2000, 1, 1));
         user.setPhoneNumber("+380678955568");
         return user;
     }
@@ -88,7 +89,7 @@ class UserControllerTest {
     @Test
     void findById_shouldReturnNotFound() throws Exception {
         UUID notFoundId = UUID.randomUUID();
-        when(userService.findById(notFoundId.toString())).thenThrow(ResourceNotFoundException.class);
+        when(userService.findById(notFoundId.toString())).thenThrow(UserNotFoundException.class);
 
         mockMvc.perform(get(baseUrl + "/" + notFoundId)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -192,7 +193,7 @@ class UserControllerTest {
     private void testSave_shouldReturnBadRequest_InvalidUser(MockHttpServletRequestBuilder requestBuilder) throws Exception {
         User invalidUserToSave = getDefaultUser();
         invalidUserToSave.setBirthDate(LocalDate.now().plusDays(1));
-        when(userService.save(invalidUserToSave)).thenThrow(IllegalAgeException.class);
+        when(userService.save(invalidUserToSave)).thenThrow(ConstraintViolationException.class);
 
         mockMvc.perform(requestBuilder
                         .contentType(MediaType.APPLICATION_JSON)

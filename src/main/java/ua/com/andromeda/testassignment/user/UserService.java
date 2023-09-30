@@ -6,10 +6,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import ua.com.andromeda.testassignment.exception.InvalidRangeException;
 import ua.com.andromeda.testassignment.exception.InvalidUUIDException;
+import ua.com.andromeda.testassignment.exception.UserNotFoundException;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -26,7 +26,7 @@ public class UserService {
         try {
             UUID uuid = UUID.fromString(id);
             return userRepository.findById(uuid)
-                    .orElseThrow(() -> new ResourceNotFoundException("User with id='" + id + "' not found"));
+                    .orElseThrow(() -> new UserNotFoundException(id));
         } catch (IllegalArgumentException ex) {
             throw new InvalidUUIDException();
         }
@@ -54,6 +54,7 @@ public class UserService {
     @SneakyThrows
     public User partialUpdate(String id, Map<String, Object> fields) {
         User foundedUser = findById(id);
-        return objectMapper.updateValue(foundedUser, fields);
+        User updatedUser = objectMapper.updateValue(foundedUser, fields);
+        return save(updatedUser);
     }
 }
