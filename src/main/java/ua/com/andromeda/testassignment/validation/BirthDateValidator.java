@@ -13,6 +13,8 @@ public class BirthDateValidator implements ConstraintValidator<BirthDate, LocalD
 
     @Override
     public boolean isValid(LocalDate value, ConstraintValidatorContext context) {
+        if (value == null) return false;
+
         LocalDate now = LocalDate.now();
         long userFullYears = ChronoUnit.YEARS.between(value, now);
         Properties properties = PropertiesLoader.loadProperties("application.properties");
